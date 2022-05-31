@@ -60,61 +60,6 @@ const validateUser = async (req, res) => {
     });
 }
 
-//update User Details
-const updateUser = async (req, res) => {
-    if (req.body) {
-        if (!req.body.id) return res.status(500).send("Id is missing");
-        let id = req.body.id;
-        if (req.body.password != null) {
-            bcrypt.genSalt(saltRounds, function (err, salt) {
-                bcrypt.hash(req.body.password, salt, async function (err, hash) {
-                    req.body.password = hash;
-                    updateDetails(id, req, (err, user) => {
-                        if (err) return res.status(500).send(err);
-                        console.log("user");
-                        console.log(user);
-                        res.status(200).send(user);
-                    })
-
-                });
-            });
-        } else {
-            updateDetails(id, req, (err, user) => {
-                if (err) return res.status(500).send(err);
-                console.log("user");
-                console.log(user);
-                res.status(200).send(user);
-            })
-        }
-        console.log(req.body);
-
-
-    }
-}
-
-function updateDetails(id, req, callback) {
-    User.findByIdAndUpdate(id, req.body)
-        .then((result2) => {
-            User.findOne({ _id: id }, (err, result) => {
-                if (err) {
-                    console.log(err);
-                    return callback(err);
-                } else {
-                    if (result && result.password) result.password = '';
-                    var user = result;
-                    // delete user.password;
-                    console.log(user);
-                    return callback(null, user);
-                }
-            });
-
-        })
-        .catch(err => {
-            console.log(err)
-            return callback(err);
-
-        })
-}
 
 //get All User
 const getAllUser = async (req, res) => {
@@ -130,11 +75,11 @@ const getAllUser = async (req, res) => {
 }
 //get User by ID
 const getUserById = async (req, res) => {
-    await User.find({_id: req.params.id},(err,result)=>{
-        if(err){
+    await User.find({ _id: req.params.id }, (err, result) => {
+        if (err) {
             console.log(err);
             res.status(500).send(err);
-        }else{
+        } else {
             res.send(result);
             console.log(result);
         }
@@ -145,22 +90,8 @@ const getUserById = async (req, res) => {
 
 
 
-//delete User
-const deleteUser = async (req, res) => {
-    if (req.body.id) {
-        await User.findByIdAndDelete(req.body.id, (err, result) => {
-            if (err) return res.status(500).send(err);
-            console.log(result);
-            return res.status(200).send(result);
-        });
-    }
-}
-
 module.exports = {
     createUser,
-    updateUser,
-    deleteUser,
     getAllUser,
-    getUserById,
     validateUser
 }
